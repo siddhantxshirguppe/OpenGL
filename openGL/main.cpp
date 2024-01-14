@@ -6,8 +6,11 @@
 #include"VAOClass.h"
 #include"VBOClass.h"
 #include"EBOClass.h"
+#include"TextureClass.h"
+#include"STB/stb_image.h"
 
 using namespace std;
+
 
 
 
@@ -29,6 +32,8 @@ int main()
 		return -1;
 	}
 
+
+
 	glfwMakeContextCurrent(window);
 	gladLoadGL();
 	glViewport(0, 0, 800, 800);
@@ -43,14 +48,15 @@ int main()
 
 
 	//write the vertex data 
-	float points01[] = {
-		0.5f,  0.5f,1.0f,0.0f,0.0f,
-		0.5f, -0.5f,0.0f,1.0f,0.0f,
-	   -0.5f, -0.5f,1.0f,0.0f,1.0f,
-		-0.5f, 0.5f,0.0f,0.0f,1.0f,
+	float model01_points[] = {
+		//position		//colors		//text coords
+		0.5f,  0.5f,	1.0,1.0,0.0f,	1.0f,1.0f,
+		0.5f, -0.5f,	1.0,0.0,0.0f,	1.0f,0.0f,
+	   -0.5f, -0.5f,	0.0,0.0,1.0f,	0.0f, 0.0f,
+	   -0.5f,  0.5f,	0.0,1.0,1.0f,	0.0f,1.0f
 	};
 
-	unsigned int indices[] =
+	unsigned int model01_indices[] =
 	{
 		0,
 		1,
@@ -58,27 +64,81 @@ int main()
 		0,
 		2,
 		3
+	};
+	//write the vertex data 
+	float model02_points[] = {
+		//position		//colors		//text coords
+		0.0f,  0.5f,	1.0,1.0,0.0f,	0.0f, 0.0f,
+		0.5f, 0.0f,		1.0,0.0,0.0f,	1.0f,0.0f,
+	   0.0f, -0.5f,		0.0,0.0,1.0f,	1.0f,1.0f,
+	   -0.5f,  0.0f,	0.0,1.0,1.0f,	0.0f,1.0f
+	};
 
+	unsigned int model02_indices[] =
+	{
+		0,
+		1,
+		2,
+		0,
+		2,
+		3
 	};
 
 	//create vertex and fragment objs and bundle them into a shader program and activate it
 	
 
+	
+	unsigned int offset = 0;
+	unsigned int stride = 7;
+
+	//init textures for all the models
+
+	//init texture_01
+	TEXTURE texture_01("bridge.png");
+	texture_01.setSlot(0); //activate slot 0 to write bridge image to slot 0
+	texture_01.Bind_and_Write();
+
+	//init vao for model 01
+	VAO vao_01;
+	VBO vbo_01(model01_points,sizeof(model01_points));
+	EBO ebo_01(model01_indices, sizeof(model01_indices));
+	offset = 0;
+	vao_01.Link(vbo_01, 0, 2, stride, offset);
+	offset = 2;
+	vao_01.Link(vbo_01, 1, 3, stride, offset);
+	offset = 5;
+	vao_01.Link(vbo_01, 2, 2, stride, offset);
+
+	
+	//init vao for model 02
+	VAO vao_02;
+	VBO vbo_02(model02_points, sizeof(model02_points));
+	EBO ebo_02(model02_indices, sizeof(model02_indices));
+	offset = 0;
+	vao_02.Link(vbo_02, 0, 2, stride, offset);
+	offset = 2;
+	vao_02.Link(vbo_01, 1, 3, stride, offset);
+	offset = 5;
+	vao_02.Link(vbo_01, 2, 2, stride, offset);
+
+
+
 	Shader shader("default.vert", "default.frag");
+	unsigned int scale_id = glGetUniformLocation(shader.getId(),"scale");
+	unsigned int tex_slot_id = glGetUniformLocation(shader.getId(), "texture_slot");
 
-	VAO vao;
-	vao.Bind();
+	//deinit for texture_01
+	texture_01.Unbind();
+	//deinit for model 01
+	vao_01.Unbind();
+	vbo_01.Unbind();
+	ebo_01.Unbind();
 
-	VBO vbo(points01,sizeof(points01));
-	EBO ebo(indices,sizeof(indices));
-
-	vao.Link(vbo, 0, 2, 5);
-	vao.Link(vbo, 1, 3, 5);
-
-	vbo.Unbind();
-	ebo.Unbind();
-
-	vao.Unbind();
+	//deinit for model 02
+	vao_02.Unbind();
+	vbo_02.Unbind();
+	ebo_02.Unbind();
+	
 
 
 
@@ -100,7 +160,13 @@ int main()
 		// Use the shader program
 		shader.Activate();
 
-		//glDrawArrays(GL_TRIANGLES, 0, 6);
+		//toggle between vao_01 and vao_02
+		//vao_01.Bind();
+		vao_02.Bind(); 
+		
+		glUniform1f(scale_id, 1.0f);
+		glUniform1i(tex_slot_id, 0);
+		
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		GLenum error = glGetError();
@@ -121,9 +187,13 @@ int main()
 		glfwPollEvents();
 	}
 
-	vao.Delete();
-	ebo.Delete();
-	vbo.Delete();
+	vao_01.Delete();
+	ebo_01.Delete();
+	vbo_01.Delete();
+
+	vao_02.Delete();
+	ebo_02.Delete();
+	vbo_02.Delete();
 	shader.Delete();
 
 	glfwDestroyWindow(window);

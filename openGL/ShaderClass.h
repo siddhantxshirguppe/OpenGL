@@ -9,13 +9,16 @@ string get_file_contents(const char* file_ptr);
 
 class Shader
 {
-	public:
+	private:
 		unsigned int shader_pgm_id;
+	public:
+		
 
 		Shader(const char* vert_file_ptr, const char* frag_file_ptr);
 		unsigned int compile_myShader(unsigned int type, const string& shaderString);
 		void Activate();
 		void Delete();
+		unsigned int getId();
 
 };
 #endif // !SHADER_CLASS_H

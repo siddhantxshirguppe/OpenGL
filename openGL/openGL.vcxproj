@@ -143,6 +143,8 @@
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ShaderClass.cpp" />
+    <ClCompile Include="STB.cpp" />
+    <ClCompile Include="TextureClass.cpp" />
     <ClCompile Include="VAOClass.cpp" />
     <ClCompile Include="VBOClass.cpp" />
   </ItemGroup>
@@ -153,6 +155,7 @@
   <ItemGroup>
     <ClInclude Include="EBOClass.h" />
     <ClInclude Include="ShaderClass.h" />
+    <ClInclude Include="TextureClass.h" />
     <ClInclude Include="VAOClass.h" />
     <ClInclude Include="VBOClass.h" />
   </ItemGroup>

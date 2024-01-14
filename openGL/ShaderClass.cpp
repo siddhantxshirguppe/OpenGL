@@ -17,7 +17,10 @@ std::string get_file_contents(const char* filename)
 	}
 	throw(errno);
 }
-
+unsigned int Shader::getId()
+{
+	return shader_pgm_id;
+}
 unsigned int Shader::compile_myShader(unsigned int type, const string& shaderString)
 {
 	unsigned int shader_id = glCreateShader(type);
@@ -97,5 +100,5 @@ void Shader::Activate()
 
 void Shader::Delete()
 {
-	glUseProgram(shader_pgm_id);
+	
 }
